@@ -15,15 +15,15 @@ document.querySelectorAll('.nav-links a').forEach(a => {
   if (href === currentPage || (currentPage === '' && href === 'index.html')) a.classList.add('active');
 });
 
-// Submit form data to Netlify Forms
-async function submitToNetlify(form) {
-  try {
-    await fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(new FormData(form)).toString(),
-    });
-  } catch (_) { /* fail silently — still show success to user */ }
+// Submit form data to Web3Forms
+async function submitToWeb3Forms(form) {
+  const data = Object.fromEntries(new FormData(form));
+  const response = await fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return response.json();
 }
 
 // Booking form
@@ -31,13 +31,18 @@ const bookingForm = document.getElementById('bookingForm');
 if (bookingForm) {
   bookingForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    await submitToNetlify(bookingForm);
+    const submitBtn = bookingForm.querySelector('[type="submit"]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+    try {
+      await submitToWeb3Forms(bookingForm);
+    } catch (_) { /* fail silently — still show success to user */ }
     const successMsg = document.getElementById('formSuccess');
     bookingForm.style.display = 'none';
     if (successMsg) successMsg.style.display = 'block';
     setTimeout(() => {
       bookingForm.reset();
       bookingForm.style.display = 'block';
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Request →'; }
       if (successMsg) successMsg.style.display = 'none';
     }, 5000);
   });
@@ -48,13 +53,18 @@ const contactForm = document.getElementById('contactForm');
 if (contactForm) {
   contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    await submitToNetlify(contactForm);
+    const submitBtn = contactForm.querySelector('[type="submit"]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending…'; }
+    try {
+      await submitToWeb3Forms(contactForm);
+    } catch (_) { /* fail silently — still show success to user */ }
     const successMsg = document.getElementById('contactSuccess');
     contactForm.style.display = 'none';
     if (successMsg) successMsg.style.display = 'block';
     setTimeout(() => {
       contactForm.reset();
       contactForm.style.display = 'block';
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send Message →'; }
       if (successMsg) successMsg.style.display = 'none';
     }, 5000);
   });
